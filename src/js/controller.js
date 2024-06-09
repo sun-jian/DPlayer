@@ -125,35 +125,37 @@ class Controller {
             this.player.moveBar = false;
         };
 
-        this.player.template.playedBarWrap.addEventListener(utils.nameMap.dragStart, () => {
-            this.player.moveBar = true;
-            document.addEventListener(utils.nameMap.dragMove, thumbMove);
-            document.addEventListener(utils.nameMap.dragEnd, thumbUp);
-        });
+        if (this.player.template.playedBarWrap) {
+            this.player.template.playedBarWrap.addEventListener(utils.nameMap.dragStart, () => {
+                this.player.moveBar = true;
+                document.addEventListener(utils.nameMap.dragMove, thumbMove);
+                document.addEventListener(utils.nameMap.dragEnd, thumbUp);
+            });
 
-        this.player.template.playedBarWrap.addEventListener(utils.nameMap.dragMove, (e) => {
-            if (this.player.video.duration) {
-                const px = this.player.template.playedBarWrap.getBoundingClientRect().left;
-                const tx = (e.clientX || e.changedTouches[0].clientX) - px;
-                if (tx < 0 || tx > this.player.template.playedBarWrap.offsetWidth) {
-                    return;
+            this.player.template.playedBarWrap.addEventListener(utils.nameMap.dragMove, (e) => {
+                if (this.player.video.duration) {
+                    const px = this.player.template.playedBarWrap.getBoundingClientRect().left;
+                    const tx = (e.clientX || e.changedTouches[0].clientX) - px;
+                    if (tx < 0 || tx > this.player.template.playedBarWrap.offsetWidth) {
+                        return;
+                    }
+                    const time = this.player.video.duration * (tx / this.player.template.playedBarWrap.offsetWidth);
+                    if (utils.isMobile) {
+                        this.thumbnails && this.thumbnails.show();
+                    }
+                    this.thumbnails && this.thumbnails.move(tx);
+                    this.player.template.playedBarTime.style.left = `${tx - (time >= 3600 ? 25 : 20)}px`;
+                    this.player.template.playedBarTime.innerText = utils.secondToTime(time);
+                    this.player.template.playedBarTime.classList.remove('hidden');
                 }
-                const time = this.player.video.duration * (tx / this.player.template.playedBarWrap.offsetWidth);
+            });
+
+            this.player.template.playedBarWrap.addEventListener(utils.nameMap.dragEnd, () => {
                 if (utils.isMobile) {
-                    this.thumbnails && this.thumbnails.show();
+                    this.thumbnails && this.thumbnails.hide();
                 }
-                this.thumbnails && this.thumbnails.move(tx);
-                this.player.template.playedBarTime.style.left = `${tx - (time >= 3600 ? 25 : 20)}px`;
-                this.player.template.playedBarTime.innerText = utils.secondToTime(time);
-                this.player.template.playedBarTime.classList.remove('hidden');
-            }
-        });
-
-        this.player.template.playedBarWrap.addEventListener(utils.nameMap.dragEnd, () => {
-            if (utils.isMobile) {
-                this.thumbnails && this.thumbnails.hide();
-            }
-        });
+            });
+        }
 
         if (!utils.isMobile) {
             this.player.template.playedBarWrap.addEventListener('mouseenter', () => {
@@ -173,13 +175,17 @@ class Controller {
     }
 
     initFullButton() {
-        this.player.template.browserFullButton.addEventListener('click', () => {
-            this.player.fullScreen.toggle('browser');
-        });
+        if (this.player.template.browserFullButton) {
+            this.player.template.browserFullButton.addEventListener('click', () => {
+                this.player.fullScreen.toggle('browser');
+            });
+        }
 
-        this.player.template.webFullButton.addEventListener('click', () => {
-            this.player.fullScreen.toggle('web');
-        });
+        if (this.player.template.webFullButton) {
+            this.player.template.webFullButton.addEventListener('click', () => {
+                this.player.fullScreen.toggle('web');
+            });
+        }
     }
 
     initVolumeButton() {
@@ -196,27 +202,31 @@ class Controller {
             this.player.template.volumeButton.classList.remove('dplayer-volume-active');
         };
 
-        this.player.template.volumeBarWrapWrap.addEventListener('click', (event) => {
-            const e = event || window.event;
-            const percentage = ((e.clientX || e.changedTouches[0].clientX) - utils.getBoundingClientRectViewLeft(this.player.template.volumeBarWrap) - 5.5) / vWidth;
-            this.player.volume(percentage);
-        });
-        this.player.template.volumeBarWrapWrap.addEventListener(utils.nameMap.dragStart, () => {
-            document.addEventListener(utils.nameMap.dragMove, volumeMove);
-            document.addEventListener(utils.nameMap.dragEnd, volumeUp);
-            this.player.template.volumeButton.classList.add('dplayer-volume-active');
-        });
-        this.player.template.volumeButtonIcon.addEventListener('click', () => {
-            if (this.player.video.muted) {
-                this.player.video.muted = false;
-                this.player.switchVolumeIcon();
-                this.player.bar.set('volume', this.player.volume(), 'width');
-            } else {
-                this.player.video.muted = true;
-                this.player.template.volumeIcon.innerHTML = Icons.volumeOff;
-                this.player.bar.set('volume', 0, 'width');
-            }
-        });
+        if (this.player.template.volumeBarWrapWrap) {
+            this.player.template.volumeBarWrapWrap.addEventListener('click', (event) => {
+                const e = event || window.event;
+                const percentage = ((e.clientX || e.changedTouches[0].clientX) - utils.getBoundingClientRectViewLeft(this.player.template.volumeBarWrap) - 5.5) / vWidth;
+                this.player.volume(percentage);
+            });
+            this.player.template.volumeBarWrapWrap.addEventListener(utils.nameMap.dragStart, () => {
+                document.addEventListener(utils.nameMap.dragMove, volumeMove);
+                document.addEventListener(utils.nameMap.dragEnd, volumeUp);
+                this.player.template.volumeButton.classList.add('dplayer-volume-active');
+            });
+        }
+        if (this.player.template.volumeButtonIcon) {
+            this.player.template.volumeButtonIcon.addEventListener('click', () => {
+                if (this.player.video.muted) {
+                    this.player.video.muted = false;
+                    this.player.switchVolumeIcon();
+                    this.player.bar.set('volume', this.player.volume(), 'width');
+                } else {
+                    this.player.video.muted = true;
+                    this.player.template.volumeIcon.innerHTML = Icons.volumeOff;
+                    this.player.bar.set('volume', 0, 'width');
+                }
+            });
+        }
     }
 
     initQualityButton() {
@@ -239,16 +249,7 @@ class Controller {
 
                 let dataURL;
                 canvas.toBlob((blob) => {
-                    dataURL = URL.createObjectURL(blob);
-                    const link = document.createElement('a');
-                    link.href = dataURL;
-                    link.download = 'DPlayer.png';
-                    link.style.display = 'none';
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(dataURL);
-                    this.player.events.trigger('screenshot', dataURL);
+                    this.player.events.trigger('screenshot', blob);
                 });
             });
         }
@@ -396,7 +397,9 @@ class Controller {
 
     hide() {
         this.player.container.classList.add('dplayer-hide-controller');
-        this.player.setting.hide();
+        if (this.player.setting) {
+            this.player.setting.hide();
+        }
         this.player.comment && this.player.comment.hide();
     }
 

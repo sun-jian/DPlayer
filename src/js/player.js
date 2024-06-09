@@ -209,7 +209,9 @@ class DPlayer {
         }
 
         this.bar.set('played', time / this.video.duration, 'width');
-        this.template.ptime.innerHTML = utils.secondToTime(time);
+        if (this.template.ptime) {
+            this.template.ptime.innerHTML = utils.secondToTime(time);
+        }
     }
 
     /**
@@ -232,7 +234,9 @@ class DPlayer {
                 })
                 .then(() => {});
         }
-        this.timer.enable('loading');
+        if (this.timer) {
+            this.timer.enable('loading');
+        }
         this.container.classList.remove('dplayer-paused');
         this.container.classList.add('dplayer-playing');
         if (this.danmaku) {
@@ -263,7 +267,9 @@ class DPlayer {
         if (!fromNative) {
             this.video.pause();
         }
-        this.timer.disable('loading');
+        if (this.timer) {
+            this.timer.disable('loading');
+        }
         this.container.classList.remove('dplayer-playing');
         this.container.classList.add('dplayer-paused');
         if (this.danmaku) {
@@ -272,6 +278,7 @@ class DPlayer {
     }
 
     switchVolumeIcon() {
+        if (!this.template.volumeIcon) return;
         if (this.volume() >= 0.95) {
             this.template.volumeIcon.innerHTML = Icons.volumeUp;
         } else if (this.volume() > 0) {
@@ -291,7 +298,9 @@ class DPlayer {
             percentage = Math.min(percentage, 1);
             this.bar.set('volume', percentage, 'width');
             const formatPercentage = `${(percentage * 100).toFixed(0)}%`;
-            this.template.volumeBarWrapWrap.dataset.balloon = formatPercentage;
+            if (this.template.volumeBarWrapWrap) {
+                this.template.volumeBarWrapWrap.dataset.balloon = formatPercentage;
+            }
             if (!nostorage) {
                 this.user.set('volume', percentage);
             }
@@ -342,7 +351,9 @@ class DPlayer {
             this.template.danmakuLoading.style.display = 'block';
             this.bar.set('played', 0, 'width');
             this.bar.set('loaded', 0, 'width');
-            this.template.ptime.innerHTML = '00:00';
+            if (this.template.ptime) {
+                this.template.ptime.innerHTML = '00:00';
+            }
             this.template.danmaku.innerHTML = '';
             if (this.danmaku) {
                 this.danmaku.reload({
@@ -492,7 +503,7 @@ class DPlayer {
         // show video time: the metadata has loaded or changed
         this.on('durationchange', () => {
             // compatibility: Android browsers will output 1 or Infinity at first
-            if (video.duration !== 1 && video.duration !== Infinity) {
+            if (this.template.dtime && video.duration !== 1 && video.duration !== Infinity) {
                 this.template.dtime.innerHTML = utils.secondToTime(video.duration);
             }
         });
@@ -543,7 +554,7 @@ class DPlayer {
                 this.bar.set('played', this.video.currentTime / this.video.duration, 'width');
             }
             const currentTime = utils.secondToTime(this.video.currentTime);
-            if (this.template.ptime.innerHTML !== currentTime) {
+            if (this.template.ptime && this.template.ptime.innerHTML !== currentTime) {
                 this.template.ptime.innerHTML = currentTime;
             }
         });
@@ -701,7 +712,9 @@ class DPlayer {
         this.hotkey.destroy();
         this.contextmenu.destroy();
         this.controller.destroy();
-        this.timer.destroy();
+        if (this.timer) {
+            this.timer.destroy();
+        }
         this.video.src = '';
         this.container.innerHTML = '';
         this.events.trigger('destroy');
